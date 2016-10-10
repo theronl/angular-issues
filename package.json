@@ -1,0 +1,22 @@
+{
+  "name": "angular-issues",
+  "version": "1.0.0",
+  "description": "A demo front-end app that pulls and displays all the angular issues from the last 7 days.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theronl/angular-issues.git"
+  },
+  "keywords": [
+    "demo"
+  ],
+  "author": "Theron J. Lewis",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/theronl/angular-issues/issues"
+  },
+  "homepage": "https://github.com/theronl/angular-issues#readme"
+}
