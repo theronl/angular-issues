@@ -29,6 +29,7 @@ build/Release
 # Dependency directories
 node_modules
 jspm_packages
+bower_components
 
 # Optional npm cache directory
 .npm
@@ -41,3 +42,6 @@ jspm_packages
 
 # Sqlite3 files
 *.db
+
+# Symbolic link to bower so I didn't have to install it globally.
+bower

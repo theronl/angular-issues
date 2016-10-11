@@ -1,0 +1,23 @@
+{
+  "name": "angular-issues",
+  "description": "A demo front-end app that pulls and displays all the angular issues from the last 7 days.",
+  "main": "index.js",
+  "authors": [
+    "Theron J. Lewis"
+  ],
+  "license": "Unlicense",
+  "keywords": [
+    "demo"
+  ],
+  "homepage": "https://github.com/theronl/angular-issues",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.1.1"
+  }
+}

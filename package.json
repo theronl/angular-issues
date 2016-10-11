@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/theronl/angular-issues/issues"
   },
-  "homepage": "https://github.com/theronl/angular-issues#readme"
+  "homepage": "https://github.com/theronl/angular-issues#readme",
+  "dependencies": {
+    "bower": "^1.7.9"
+  }
 }
