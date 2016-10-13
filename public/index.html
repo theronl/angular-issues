@@ -21,11 +21,13 @@ function render(response) {
 	Mustache.parse(header_template);
 	Mustache.parse(issue_template);
 	$('#header_target').html(Mustache.render(header_template, { 'date' : startDate.toISOString() }));
+	var odd = false;
 	var rendered = Mustache.render(issue_template, {
 		'data' : data,
 		'bodyf' : function() { return markdown.toHTML(this.body).replace('\n', '<br>'); },
 		'userf' : function() { return this.user && this.user.login || '&nbsp;'; },
-		'assigneef' : function() { return this.assignee && this.assignee.login || '<strong>Not assigned</strong>'; }
+		'assigneef' : function() { return this.assignee && this.assignee.login || '<i>Not assigned</i>'; },
+		'row' : function() { odd = !odd; return odd ? "row-odd" : "row-even"; }
 	});
 	$('#issue_target').html(rendered);
 }
@@ -50,28 +52,16 @@ document.getElementsByTagName('head')[0].appendChild(script);
 <script id="header_template" type="x-tmpl-mustache">
   <h2>Angular Issues since {{date}}</h2>
 </script>
-<div id="issue_target">Loading...</div>
+<div class="container-fluid" id="issue_target">Loading...</div>
 <script id="issue_template" type="x-tmpl-mustache">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Title</th>
-        <th>Body</th>
-        <th>User</th>
-        <th>Assignee</th>
-      </tr>
-    </thead>
-    <tbody>
 {{#data}}
-<tr>
-<td>{{title}}</td>
-<td>{{{bodyf}}}</td>
-<td>{{{userf}}}</td>
-<td>{{{assigneef}}}</td>
-</tr>
+	<div class="row {{row}}">
+	  <div class="col-sm-12"><div class="row"><div class="col-sm-1 custom-text-right"><strong>Title:</strong></div><div class="col-sm-11">{{title}}</div></div></div>
+	  <div class="col-sm-12"><div class="row"><div class="col-sm-1 custom-text-right"><strong>User:</strong></div><div class="col-sm-11">{{{userf}}}</div></div></div>
+	  <div class="col-sm-12"><div class="row"><div class="col-sm-1 custom-text-right"><strong>Assignee:</strong></div><div class="col-sm-11">{{{assigneef}}}</div></div></div>
+	  <div class="col-sm-12"><div class="row"><div class="col-sm-1 custom-text-right"><strong>Issue:</strong></div><div class="col-sm-11">{{{bodyf}}}</div></div></div>
+	</div>
 {{/data}}
-    </tbody>
-  </table>
 </script>
 </div>
 </body>
