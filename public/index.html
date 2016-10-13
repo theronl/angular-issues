@@ -5,9 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="build/build.css">
-<!-- link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" -->
-<!-- script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script -->
+<link rel="stylesheet" href="css/site.css">
 <script src="build/build.js"></script>
 <script src="js/markdown.js"></script>
 <script type="text/javascript">
@@ -20,23 +18,16 @@ function render(response) {
 	console.log(data);
 	var header_template = $('#header_template').html();
 	var issue_template = $('#issue_template').html();
-	Mustache.parse(header_template);   // optional, speeds up future uses
-	Mustache.parse(issue_template);   // optional, speeds up future uses
+	Mustache.parse(header_template);
+	Mustache.parse(issue_template);
 	$('#header_target').html(Mustache.render(header_template, { 'date' : startDate.toISOString() }));
 	var rendered = Mustache.render(issue_template, {
 		'data' : data,
 		'bodyf' : function() { return markdown.toHTML(this.body).replace('\n', '<br>'); },
 		'userf' : function() { return this.user && this.user.login || '&nbsp;'; },
-		'assigneef' : function() { return this.assignee && this.assignee.login || '&nbsp;'; }
+		'assigneef' : function() { return this.assignee && this.assignee.login || '<strong>Not assigned</strong>'; }
 	});
 	$('#issue_target').html(rendered);
-
-	// for (i=0; i<20 ; i++) {
-	// 	console.log(data[i].title); // string
-	// 	console.log(markdown.toHTML(data[i].body)); // Markup
-	// 	console.log(data[i].user && data[i].user.login || '&nbsp;'); // string
-	// 	console.log(data[i].assignee && data[i].assignee.login || '&nbsp;'); // string
-	// }
 }
 
 // With the results from the API, display, in HTML, the returned
