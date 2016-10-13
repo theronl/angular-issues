@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Angular Issues</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="build/build.css">
+<!-- link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" -->
+<!-- script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script -->
+<script src="build/build.js"></script>
+<script src="js/markdown.js"></script>
+<script type="text/javascript">
+var startDate = new Date(Date.now()-1000*60*60*24*7);
+var scriptUrl = 'https://api.github.com/repos/angular/angular/issues?since=' + startDate.toISOString() + '&callback=render';
+function render(response) {
+	var meta = response.meta;
+	var data = response.data;
+	console.log(meta);
+	console.log(data);
+	var header_template = $('#header_template').html();
+	var issue_template = $('#issue_template').html();
+	Mustache.parse(header_template);   // optional, speeds up future uses
+	Mustache.parse(issue_template);   // optional, speeds up future uses
+	$('#header_target').html(Mustache.render(header_template, { 'date' : startDate.toISOString() }));
+	var rendered = Mustache.render(issue_template, {
+		'data' : data,
+		'bodyf' : function() { return markdown.toHTML(this.body).replace('\n', '<br>'); },
+		'userf' : function() { return this.user && this.user.login || '&nbsp;'; },
+		'assigneef' : function() { return this.assignee && this.assignee.login || '&nbsp;'; }
+	});
+	$('#issue_target').html(rendered);
+
+	// for (i=0; i<20 ; i++) {
+	// 	console.log(data[i].title); // string
+	// 	console.log(markdown.toHTML(data[i].body)); // Markup
+	// 	console.log(data[i].user && data[i].user.login || '&nbsp;'); // string
+	// 	console.log(data[i].assignee && data[i].assignee.login || '&nbsp;'); // string
+	// }
+}
+
+// With the results from the API, display, in HTML, the returned
+// values with their title, body, user login, and assignee login.
+console.log('scriptURL: ' + scriptUrl);
+
+var script = document.createElement('script');
+// script.src = 'https://api.github.com?callback=foo';
+// script.src = 'https://api.github.com/repos/angular/angular/issues?since=2016103T000000Z&callback=render';
+script.src = 'js/issues.js';
+
+document.getElementsByTagName('head')[0].appendChild(script);
+		
+</script>
+</head>
+
+<body>
+<div class="container-fluid">
+<div id="header_target"><h2>Angular Issues</h2></div>
+<script id="header_template" type="x-tmpl-mustache">
+  <h2>Angular Issues since {{date}}</h2>
+</script>
+<div id="issue_target">Loading...</div>
+<script id="issue_template" type="x-tmpl-mustache">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Body</th>
+        <th>User</th>
+        <th>Assignee</th>
+      </tr>
+    </thead>
+    <tbody>
+{{#data}}
+<tr>
+<td>{{title}}</td>
+<td>{{{bodyf}}}</td>
+<td>{{{userf}}}</td>
+<td>{{{assigneef}}}</td>
+</tr>
+{{/data}}
+    </tbody>
+  </table>
+</script>
+</div>
+</body>
+</html>
