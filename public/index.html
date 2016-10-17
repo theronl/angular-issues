@@ -78,7 +78,18 @@ function renderPage(page) {
 var script = document.createElement('script');
 script.src = 'js/issues.js';
 document.getElementsByTagName('head')[0].appendChild(script);
-
+/*
+  To do:
+  1) Turn the pager in to a mustache template
+  2) Make sure it doesn't add a pager if there is only one page
+  3) Make the maximum number of pages shown settable (eg: 5).
+  4) Have the active page be the one in the middle of the shown pages
+  5) Take in to consideration the "ends" of the pager (eg: Disable
+  next page/group when the last page/group is reached.)
+  6) Add a refresh button
+  7) add a warning when the number of allowed queries gets low.
+  8) bonus:  Add oauth login for github to increase allowed queries.
+ */
 </script>
 </head>
 
@@ -90,13 +101,13 @@ document.getElementsByTagName('head')[0].appendChild(script);
 </script>
 <div class="container" id="issue_top_pager">
   <ul class="pagination">
-    <li><a href="#">«</a></li>
-    <li><a href="#">&lt;</a></li>
-    <li><a href="#">1</a></li>
-    <li><a href="#">2</a></li>
-    <li><a href="#">3</a></li>
-    <li><a href="#">4</a></li>
-    <li><a href="#">5</a></li>
+    <li class="disabled"><a href="#">«</a></li>
+    <li class="disabled"><a href="#">&lt;</a></li>
+    <li class="active"><a href="javascript:renderPage(1)">1</a></li>
+    <li class=""><a href="javascript:renderPage(2)">2</a></li>
+    <li><a href="javascript:renderPage(3)">3</a></li>
+    <li><a href="javascript:renderPage(4)">4</a></li>
+    <li><a href="javascript:renderPage(5)">5</a></li>
     <li><a href="#">6</a></li>
 	<li><a href="#">&gt;</a></li>
     <li><a href="#">»</a></li>
