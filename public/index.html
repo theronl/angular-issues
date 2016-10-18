@@ -4,9 +4,9 @@
 <title>Angular Issues</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="build/build.css">
+<link rel="stylesheet" href="css/build.css">
 <link rel="stylesheet" href="css/site.css">
-<script src="build/build.js"></script>
+<script src="js/build.js"></script>
 <script src="js/markdown.js"></script>
 <script type="text/javascript">
 var startDate = new Date(Date.now()-1000*60*60*24*7);
@@ -16,7 +16,10 @@ var pagecount = 1;
 
 
 function renderPager(page) {
-	// console.log("renderPager(" + String(page) + ") called. pagecount=" + String(pagecount));
+	/*
+	  Uses mustache templates to render a pager at the top and bottom
+	  of the display table.
+	 */
 	page = Math.max(1, Math.min(parseInt(page), pagecount));
 	if (pagecount <= 1) {
 		$('#top_pager_target').html("");
@@ -74,7 +77,14 @@ function renderPager(page) {
 }
 
 function render(response) {
-	// console.log("render(...) called.");
+	/*
+	  Called by the JSON-P callback response which wrappers the
+	  request metadata and JSON payload in a function call for cross
+	  domain loading.  Uses mustache templates to render the main
+	  display table and update the table header with the number of
+	  pages and the number of remaining queries left from the query
+	  rate limiter.
+	 */
 	var meta = response.meta;
 	var data = response.data;
 	var header_template = $('#header_template').html();
@@ -93,7 +103,6 @@ function render(response) {
 		}
 		else if (meta.Link[i][1].rel == "last") {
 			pagecount = parseInt(pgRe.exec(meta.Link[i][0])[1]);
-			// console.log("Pagecount changed to " + String(pagecount));
 		}
 		else if (meta.Link[i][1].rel == "prev") {
 			var prev = parseInt(pgRe.exec(meta.Link[i][0])[1]);
@@ -108,7 +117,6 @@ function render(response) {
 	else {
 		thisPage = pagecount;
 	}
-	// console.log("setting page from " + String(current_page) + " to " + String(thisPage) + ".");
 	current_page = thisPage;
 	var resetdate = new Date();
 	resetdate.setTime(parseInt(meta["X-RateLimit-Reset"]) * 1000);
@@ -133,24 +141,26 @@ function render(response) {
 }
 
 function pageUrl(page) {
-	// console.log("pageUrl(" + String(page) + ") called.");
+	/*
+	  Returns the JSON-P url for the page in question. 
+	 */
 	return 'https://api.github.com/repos/angular/angular/issues?since=' + startDate.toISOString() + '&callback=render&page=' + String(page);
 }
 
-// With the results from the API, display, in HTML, the returned
-// values with their title, body, user login, and assignee login.
-// console.log('pageURL: ' + pageUrl(1));
-
 function renderPage(page) {
-	// console.log("renderPage(" + String(page) + ") called. pagecount: " + String(pagecount));
+	/*
+	  Attempts to render the current page from the array of cached
+	  pages.  If the page isn't found the missing page is fetched by
+	  appending the script to the document using the JSON-P callback
+	  mechanism to circumvent the cross domain issue without having
+	  to run a server.
+	 */
 	page = Math.max(1, Math.min(parseInt(page), pagecount));
 	if (pages[page-1]) {
 		$('#issue_target').html(pages[page-1]);
 		renderPager(page);
 	}
 	else {
-		// This isn't likely to work once head is done loading so I
-		// should try having a div that I set the innerHTML to.
 		var script = document.createElement('script');
 		script.src = pageUrl(page);
 		document.getElementsByTagName('head')[0].appendChild(script);
@@ -158,9 +168,6 @@ function renderPage(page) {
 }
 
 renderPage(1);
-// var script = document.createElement('script');
-// script.src = 'js/issues.js';
-// document.getElementsByTagName('head')[0].appendChild(script);
 </script>
 </head>
 
