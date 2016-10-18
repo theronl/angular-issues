@@ -1,2 +1,5 @@
-# restnote-api
-A simple demo node js app implementing a restful CRUD api for storing a note.
+# angular-issues
+
+A simple demo node js browser app to read the last weeks worth of issues from the angular 
+project on github and display them for browsing.
+
