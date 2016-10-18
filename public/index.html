@@ -16,7 +16,7 @@ var pagecount = 1;
 
 
 function renderPager(page) {
-	console.log("renderPager(" + String(page) + ") called. pagecount=" + String(pagecount));
+	// console.log("renderPager(" + String(page) + ") called. pagecount=" + String(pagecount));
 	page = Math.max(1, Math.min(parseInt(page), pagecount));
 	if (pagecount <= 1) {
 		$('#top_pager_target').html("");
@@ -74,15 +74,15 @@ function renderPager(page) {
 }
 
 function render(response) {
-	console.log("render(...) called.");
+	// console.log("render(...) called.");
 	var meta = response.meta;
 	var data = response.data;
 	var header_template = $('#header_template').html();
 	var issue_template = $('#issue_template').html();
 	Mustache.parse(header_template);
 	Mustache.parse(issue_template);
-	console.log(meta);
-	console.log(data);
+	// console.log(meta);
+	// console.log(data);
 	var pgRe = /[&?]page\=(\d+)/;
 	var linklen = meta.Link.length;
 	var thisPage = 0;
@@ -93,7 +93,7 @@ function render(response) {
 		}
 		else if (meta.Link[i][1].rel == "last") {
 			pagecount = parseInt(pgRe.exec(meta.Link[i][0])[1]);
-			console.log("Pagecount changed to " + String(pagecount));
+			// console.log("Pagecount changed to " + String(pagecount));
 		}
 		else if (meta.Link[i][1].rel == "prev") {
 			var prev = parseInt(pgRe.exec(meta.Link[i][0])[1]);
@@ -108,9 +108,17 @@ function render(response) {
 	else {
 		thisPage = pagecount;
 	}
-	console.log("setting page from " + String(current_page) + " to " + String(thisPage) + ".");
+	// console.log("setting page from " + String(current_page) + " to " + String(thisPage) + ".");
 	current_page = thisPage;
-	$('#header_target').html(Mustache.render(header_template, { 'date' : startDate.toISOString() }));
+	var resetdate = new Date();
+	resetdate.setTime(parseInt(meta["X-RateLimit-Reset"]) * 1000);
+	var queriesleft = meta["X-RateLimit-Remaining"];
+	$('#header_target').html(Mustache.render(header_template, { 
+		'date' : startDate.toLocaleString(),
+		'resetdate' : resetdate.toLocaleString(),
+		'queries' : queriesleft,
+		'pagecount' : String(pagecount)
+	}));
 	var odd = false;
 	var rendered = Mustache.render(issue_template, {
 		'data' : data,
@@ -125,16 +133,16 @@ function render(response) {
 }
 
 function pageUrl(page) {
-	console.log("pageUrl(" + String(page) + ") called.");
+	// console.log("pageUrl(" + String(page) + ") called.");
 	return 'https://api.github.com/repos/angular/angular/issues?since=' + startDate.toISOString() + '&callback=render&page=' + String(page);
 }
 
 // With the results from the API, display, in HTML, the returned
 // values with their title, body, user login, and assignee login.
-console.log('pageURL: ' + pageUrl(1));
+// console.log('pageURL: ' + pageUrl(1));
 
 function renderPage(page) {
-	console.log("renderPage(" + String(page) + ") called. pagecount: " + String(pagecount));
+	// console.log("renderPage(" + String(page) + ") called. pagecount: " + String(pagecount));
 	page = Math.max(1, Math.min(parseInt(page), pagecount));
 	if (pages[page-1]) {
 		$('#issue_target').html(pages[page-1]);
@@ -153,12 +161,6 @@ renderPage(1);
 // var script = document.createElement('script');
 // script.src = 'js/issues.js';
 // document.getElementsByTagName('head')[0].appendChild(script);
-/*
-  To do:
-  1) Add a refresh button
-  2) add a warning when the number of allowed queries gets low.
-  3) bonus:  Add oauth login for github to increase allowed queries.
- */
 </script>
 </head>
 
@@ -166,7 +168,7 @@ renderPage(1);
 <div class="container-fluid">
 <div id="header_target"><h3>Angular Issues</h3></div>
 <script id="header_template" type="x-tmpl-mustache">
-  <h2>Angular Issues since {{date}}</h2>
+  <h3>Angular Issues since {{date}} <br><small>{{pagecount}} pages. {{queries}} queries left until {{resetdate}}</small></h3>
 </script>
 <script id="pager_template" type="x-tmpl-mustache">
 <ul class="pagination">
