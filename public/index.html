@@ -12,8 +12,69 @@
 var startDate = new Date(Date.now()-1000*60*60*24*7);
 var pages = [ ];
 var current_page = 1;
-var pagecount = 0;
+var pagecount = 1;
+
+
+function renderPager(page) {
+	console.log("renderPager(" + String(page) + ") called. pagecount=" + String(pagecount));
+	page = Math.max(1, Math.min(parseInt(page), pagecount));
+	if (pagecount <= 1) {
+		$('#top_pager_target').html("");
+		$('#bottom_pager_target').html("");
+		return;
+	}
+	var pager = {
+		'data' : [ 
+		]
+	};
+	var prevblock = { 'symbol' : '«' };
+	var prevpage = { 'symbol' : '<' };
+	var nextblock = { 'symbol' : '»' };
+	var nextpage = { 'symbol' : '>' };
+	if (page === 1) {
+		prevblock.class = "disabled";
+		prevpage.class = "disabled";
+		prevblock.href = "#";
+		prevpage.href = "#";
+	}
+	else {
+		prevblock.class = "";
+		prevpage.class = "";
+		prevblock.href = "javascript:renderPage(" + String(Math.max(1, page - 5)) + ")";
+		prevpage.href = "javascript:renderPage(" + String(page - 1) + ")";
+	}
+	if (page === pagecount) {
+		nextblock.class = "disabled";
+		nextpage.class = "disabled";
+		nextblock.href = "#";
+		nextpage.href = "#";
+	}
+	else {
+		nextblock.class = "";
+		nextpage.class = "";
+		nextblock.href = "javascript:renderPage(" + String(Math.min(pagecount, page + 5)) + ")";
+		nextpage.href = "javascript:renderPage(" + String(page + 1) + ")";
+	}
+	pager.data.push(prevblock, prevpage);
+	var istart = Math.max(1, Math.min(page - 2, pagecount - 4));
+	var ilim = Math.min(istart + 5, pagecount + 1);
+	for (i = istart; i < ilim; i++ ) {
+		pager.data.push({
+			'class' : i == page ? 'active' : '',
+			'href' : 'javascript:renderPage(' + String(i) + ')',
+			'symbol' : String(i)
+		});
+	}
+	pager.data.push(nextpage, nextblock);
+	var pager_template = $('#pager_template').html();
+	Mustache.parse(pager_template);
+	var rendered = Mustache.render(pager_template, pager);
+	$('#top_pager_target').html(rendered);
+	$('#bottom_pager_target').html(rendered);
+}
+
 function render(response) {
+	console.log("render(...) called.");
 	var meta = response.meta;
 	var data = response.data;
 	var header_template = $('#header_template').html();
@@ -32,14 +93,23 @@ function render(response) {
 		}
 		else if (meta.Link[i][1].rel == "last") {
 			pagecount = parseInt(pgRe.exec(meta.Link[i][0])[1]);
+			console.log("Pagecount changed to " + String(pagecount));
+		}
+		else if (meta.Link[i][1].rel == "prev") {
+			var prev = parseInt(pgRe.exec(meta.Link[i][0])[1]);
+			if (prev+2 < pagecount) {
+				nextPage = prev+2;
+			}
 		}
 	}
 	if (nextPage > 0) {
-		thisPage = nextPage - 1;
+		thisPage = Math.max(Math.min(nextPage - 1, pagecount), 1);
 	}
 	else {
 		thisPage = pagecount;
 	}
+	console.log("setting page from " + String(current_page) + " to " + String(thisPage) + ".");
+	current_page = thisPage;
 	$('#header_target').html(Mustache.render(header_template, { 'date' : startDate.toISOString() }));
 	var odd = false;
 	var rendered = Mustache.render(issue_template, {
@@ -51,9 +121,11 @@ function render(response) {
 	});
 	pages[thisPage-1] = rendered;
 	$('#issue_target').html(rendered);
+	renderPager(current_page);
 }
 
 function pageUrl(page) {
+	console.log("pageUrl(" + String(page) + ") called.");
 	return 'https://api.github.com/repos/angular/angular/issues?since=' + startDate.toISOString() + '&callback=render&page=' + String(page);
 }
 
@@ -62,8 +134,11 @@ function pageUrl(page) {
 console.log('pageURL: ' + pageUrl(1));
 
 function renderPage(page) {
+	console.log("renderPage(" + String(page) + ") called. pagecount: " + String(pagecount));
+	page = Math.max(1, Math.min(parseInt(page), pagecount));
 	if (pages[page-1]) {
 		$('#issue_target').html(pages[page-1]);
+		renderPager(page);
 	}
 	else {
 		// This isn't likely to work once head is done loading so I
@@ -74,21 +149,15 @@ function renderPage(page) {
 	}
 }
 
-// renderPage(1);
-var script = document.createElement('script');
-script.src = 'js/issues.js';
-document.getElementsByTagName('head')[0].appendChild(script);
+renderPage(1);
+// var script = document.createElement('script');
+// script.src = 'js/issues.js';
+// document.getElementsByTagName('head')[0].appendChild(script);
 /*
   To do:
-  1) Turn the pager in to a mustache template
-  2) Make sure it doesn't add a pager if there is only one page
-  3) Make the maximum number of pages shown settable (eg: 5).
-  4) Have the active page be the one in the middle of the shown pages
-  5) Take in to consideration the "ends" of the pager (eg: Disable
-  next page/group when the last page/group is reached.)
-  6) Add a refresh button
-  7) add a warning when the number of allowed queries gets low.
-  8) bonus:  Add oauth login for github to increase allowed queries.
+  1) Add a refresh button
+  2) add a warning when the number of allowed queries gets low.
+  3) bonus:  Add oauth login for github to increase allowed queries.
  */
 </script>
 </head>
@@ -99,20 +168,14 @@ document.getElementsByTagName('head')[0].appendChild(script);
 <script id="header_template" type="x-tmpl-mustache">
   <h2>Angular Issues since {{date}}</h2>
 </script>
-<div class="container" id="issue_top_pager">
-  <ul class="pagination">
-    <li class="disabled"><a href="#">«</a></li>
-    <li class="disabled"><a href="#">&lt;</a></li>
-    <li class="active"><a href="javascript:renderPage(1)">1</a></li>
-    <li class=""><a href="javascript:renderPage(2)">2</a></li>
-    <li><a href="javascript:renderPage(3)">3</a></li>
-    <li><a href="javascript:renderPage(4)">4</a></li>
-    <li><a href="javascript:renderPage(5)">5</a></li>
-    <li><a href="#">6</a></li>
-	<li><a href="#">&gt;</a></li>
-    <li><a href="#">»</a></li>
-  </ul>
-</div>
+<script id="pager_template" type="x-tmpl-mustache">
+<ul class="pagination">
+{{#data}}
+<li class="{{class}}"><a href="{{{href}}}">{{symbol}}</a></li>
+{{/data}}
+</ul>
+</script>
+<div class="container" id="top_pager_target"></div>
 <div class="container-fluid" id="issue_target">Loading...</div>
 <script id="issue_template" type="x-tmpl-mustache">
 {{#data}}
@@ -124,18 +187,7 @@ document.getElementsByTagName('head')[0].appendChild(script);
 	</div>
 {{/data}}
 </script>
-<div class="container" id="issue_bottom_pager">
-  <ul class="pagination">
-    <li><a href="#">«</a></li>
-    <li><a href="#">1</a></li>
-    <li><a href="#">2</a></li>
-    <li><a href="#">3</a></li>
-    <li><a href="#">4</a></li>
-    <li><a href="#">5</a></li>
-    <li><a href="#">6</a></li>
-    <li><a href="#">»</a></li>
-  </ul>
-</div>
+<div class="container" id="bottom_pager_target"></div>
 </div>
 </body>
 </html>
