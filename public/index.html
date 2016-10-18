@@ -30,10 +30,22 @@ function renderPager(page) {
 		'data' : [ 
 		]
 	};
-	var prevblock = { 'symbol' : '«' };
-	var prevpage = { 'symbol' : '<' };
-	var nextblock = { 'symbol' : '»' };
-	var nextpage = { 'symbol' : '>' };
+	var prevblock = { 
+		'symbol' : '«', 
+		'extras' : 'data-toggle="tooltip" data-placement="top" title="fast backward"'
+	};
+	var prevpage = {
+		'symbol' : '<',
+		'extras' : 'data-toggle="tooltip" data-placement="top" title="previous page"'
+	};
+	var nextblock = { 
+		'symbol' : '»',
+		'extras' : 'data-toggle="tooltip" data-placement="top" title="fast forward"'
+	};
+	var nextpage = {
+		'symbol' : '>',
+		'extras' : 'data-toggle="tooltip" data-placement="top" title="next page"'
+	};
 	if (page === 1) {
 		prevblock.class = "disabled";
 		prevpage.class = "disabled";
@@ -65,7 +77,9 @@ function renderPager(page) {
 		pager.data.push({
 			'class' : i == page ? 'active' : '',
 			'href' : 'javascript:renderPage(' + String(i) + ')',
-			'symbol' : String(i)
+			'symbol' : String(i),
+			'extras' : 'data-toggle="tooltip" data-placement="top" title="page '
+				+ String(i) + '"'
 		});
 	}
 	pager.data.push(nextpage, nextblock);
@@ -180,7 +194,7 @@ renderPage(1);
 <script id="pager_template" type="x-tmpl-mustache">
 <ul class="pagination">
 {{#data}}
-<li class="{{class}}"><a href="{{{href}}}">{{symbol}}</a></li>
+<li class="{{class}}"><a href="{{{href}}}" {{{extras}}}>{{symbol}}</a></li>
 {{/data}}
 </ul>
 </script>
